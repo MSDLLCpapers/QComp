@@ -1,0 +1,23 @@
+In order to use QComp, it is necessary to download and install several third-party Python packages, which may be distributed under various licenses. For the most recent list of these packages, refer to README.md and consult the license terms of the individual packages.
+
+You must agree to the terms of these licenses, in addition to the QComp source code license, in order to use this software.
+
+--------------------------------------------------
+Third party software listed by License type
+--------------------------------------------------
+
+numpy - https://github.com/numpy/numpy/blob/main/LICENSE.txt
+
+matplotlib - https://matplotlib.org/stable/project/license.html
+
+scipy - https://github.com/scipy/scipy/blob/main/LICENSE.txt
+
+scikit-learn - https://github.com/scikit-learn/scikit-learn?tab=BSD-3-Clause-1-ov-file
+
+pandas - https://github.com/pandas-dev/pandas?tab=BSD-3-Clause-1-ov-file
+
+pytorch - https://github.com/pytorch/pytorch/blob/main/LICENSE
+
+tensorflow https://github.com/tensorflow/tensorflow/blob/master/LICENSE
+
+deepchem - https://github.com/deepchem/deepchem/blob/master/LICENSE
