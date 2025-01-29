@@ -1,5 +1,5 @@
 # QSAR-Complete (QComp)
-A robust, interpretable, non-iterative data completion framework for sparse datasets in drug discovery.
+A robust, interpretable, non-iterative imputation framework for sparse datasets in drug discovery.
 
 <img src="figure1.png" width="600" />
 
