@@ -33,6 +33,7 @@ class QComp(nn. Module):
         ##### linear transformation for qsar data
         # self.qsar_trans_M = nn.Parameter(th.eye(size))
         # self.qsar_trans_b = nn.Parameter(th.zeros(size))
+        
         ##### turn off the linear transformation
         self.register_buffer("qsar_trans_M", th.eye(size))
         self.register_buffer("qsar_trans_b", th.zeros(size))
@@ -48,7 +49,7 @@ class QComp(nn. Module):
     def transform(self, x):
         return th.matmul(x, self.qsar_trans_M) + self.qsar_trans_b
 
-    def forward(self):  
+    def forward(self):
         L = th.zeros((self.n, self.n), dtype=self.lower_triangular.dtype, device=self.lower_triangular.device)
         L[self.filter_matrix] = self.lower_triangular
         return th.matmul(L, L.t())
@@ -68,7 +69,7 @@ class QComp(nn. Module):
         self.lower_triangular.data = L[self.filter_matrix]
         return
     
-    def impute(self, exp_data_masked, qsar_data_original ):
+    def impute(self, exp_data_masked, qsar_data_original):
         '''
         Args:
             exp_data_masked: a tensor of shape (#assay)

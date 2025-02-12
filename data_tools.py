@@ -47,6 +47,7 @@ class QsarDataset:
         if normalize:
             exp_data = (exp_data - self.global_mean)/self.global_std
             qsar_data = (qsar_data - self.global_mean)/self.global_std
+        
         exp_data = th.tensor(exp_data, dtype=dtype, device=device)
         qsar_data = th.tensor(qsar_data, dtype=dtype, device=device)
 
