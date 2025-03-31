@@ -1,6 +1,6 @@
 import torch.nn as nn
 import torch as th  
-
+import numpy as np
 
 class PositiveDefiniteMatrix(nn.Module):
     def __init__(self, size):
@@ -30,7 +30,7 @@ class QComp(nn. Module):
         self.lower_triangular = nn.Parameter(initial_lower_triangular)
         self.filter_matrix = th.tril(th.ones((self.n, self.n), dtype=th.bool, device=self.lower_triangular.device))
 
-        ##### linear transformation for qsar data
+        # #### linear transformation for qsar data
         # self.qsar_trans_M = nn.Parameter(th.eye(size))
         # self.qsar_trans_b = nn.Parameter(th.zeros(size))
         
@@ -43,19 +43,21 @@ class QComp(nn. Module):
         else:
             mute_mask_diag = th.diag(mute_mask)
             if mute_mask_diag.min() == 0:
-                print('please do not mute the diagonal elements of the sigma matrix.')
+                raise ValueError( 'please do not mute the diagonal elements of the sigma matrix.')
+                # print('please do not mute the diagonal elements of the sigma matrix.')
             self.register_buffer("mute_mask", mute_mask)
 
     def transform(self, x):
         return th.matmul(x, self.qsar_trans_M) + self.qsar_trans_b
 
+
     def forward(self):
         L = th.zeros((self.n, self.n), dtype=self.lower_triangular.dtype, device=self.lower_triangular.device)
         L[self.filter_matrix] = self.lower_triangular
         return th.matmul(L, L.t())
-    
+
     def regularize(self):  
-        tol = 1e-12
+        tol = 1e-6
         with th.no_grad():
             sigma_original = self.forward()
             sigma = sigma_original * self.mute_mask
@@ -64,7 +66,10 @@ class QComp(nn. Module):
             sigma_reconstruct = eigenvectors @ (th.diag(eigenvalue_pd) @ eigenvectors.T)
             if (eigenvalue_pd-eigenvalue).sum() / eigenvalue.sum() > 0.01:
                 print('regularized positve definite sigma matrix is not close enough to the original one.')
-            L = th.linalg.cholesky(sigma_reconstruct)
+            # L = th.linalg.cholesky(sigma_reconstruct)
+            sigma_reconstruct_numpy = sigma_reconstruct.cpu().numpy()
+            L = np.linalg.cholesky(sigma_reconstruct_numpy)
+            L = th.tensor(L, dtype=self.lower_triangular.dtype, device=self.lower_triangular.device)
         print('mean|sigma_regularized-sigma| / mean|sigma|=', th.abs(sigma_reconstruct-sigma_original).mean() / th.abs(sigma_original).mean() )
         self.lower_triangular.data = L[self.filter_matrix]
         return

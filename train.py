@@ -16,39 +16,58 @@ class trainer:
     def log_likelihood(self, exp_data, qsar_data):
 
         filter_O = th.isfinite(exp_data) # filter for observed data
+        if filter_O.to(dtype=int).sum() == 0:
+            return th.tensor(0.0).to(dtype=exp_data.dtype, device=exp_data.device)
 
         diff_O = exp_data[filter_O] - qsar_data[filter_O]
         k_O = len(diff_O)
 
         sigma = self.model.forward()
         sigma_OO = sigma[filter_O, :][:, filter_O]
+        eigval_sigma_OO = th.linalg.eigvalsh(sigma_OO)
+        # ########### debug
+        # eigval, eigvec = th.linalg.eig(sigma)
+        # print('eigval of sigma=', eigval.real)
+        # eigval, eigvec = th.linalg.eig(sigma_OO)
+        # print('eigval of sigma_OO=', eigval.real)
+        # print('det(sigma_OO)=', th.det(sigma_OO))
+        # ###########
 
         ## use cholesky decomposition to compute the inverse of sigma_OO
         u = th.linalg.cholesky(sigma_OO)
         inverse_sigma_OO = th.cholesky_inverse(u)
-
+        
         term1 = -0.5 * th.matmul(diff_O, th.matmul(inverse_sigma_OO, diff_O))
         term2 = -0.5 * k_O * th.log(2 * th.tensor(np.pi))
-        term3 = -0.5 * th.log(th.det(sigma_OO))
-
+        # term3 = -0.5 * th.log(th.det(sigma_OO)) ## th.det(sigma_00) will be 0 due to small eigenvalues, then this leads to nan. 
+        term3 = -0.5 * th.sum(th.log(eigval_sigma_OO)) ## this won't lead to nan.
         return term1 + term2 + term3
     
-    def train_step(self, exp_dataset, qsar_dataset):
+
+    def train_step(self, exp_dataset, qsar_dataset, flag_regularize):
 
         self.optimizer.zero_grad()
 
         #### transform qsar_dataset
         qsar_dataset = self.model.transform(qsar_dataset)
-
         #### compute loss
         loss = 0
         for (exp_data, qsar_data) in zip(exp_dataset, qsar_dataset):
-            loss += -self.log_likelihood(exp_data, qsar_data)
+            loss_addition = -self.log_likelihood(exp_data, qsar_data)
+            ## check if loss_addition is nan or infinity
+            if th.isnan(loss_addition) or th.isinf(loss_addition):
+                print('loss_addition is nan or infinity')
+                print('exp_data=', exp_data)
+                print('qsar_data=', qsar_data)
+                raise ValueError('loss_addition is nan or infinity')
+            loss += loss_addition
+        
         loss /= exp_dataset.size(dim=0)
-
         loss.backward()
         self.optimizer.step()
-        self.model.regularize()  # new
+
+        if flag_regularize:
+            self.model.regularize() # new
         return loss
     
     def scheduler_step(self):
