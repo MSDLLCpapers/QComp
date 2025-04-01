@@ -11,9 +11,10 @@ On Linux:
 conda create --name qcomp
 conda activate qcomp
 conda install pytorch torchvision torchaudio cpuonly -c pytorch
-pip install deepchem
-pip install tensorflow ## deepchem requires tensorflow
 pip install matplotlib
+conda install pandas
+Conda install scikit-learn
+Conda install tensorboard
 ```
 
 ## Run
