@@ -3,7 +3,8 @@ A robust, interpretable, non-iterative imputation framework for sparse datasets 
 
 <img src="figure1.png" width="600" />
 
-This is the repo for the manuscript: https://arxiv.org/pdf/2405.11703
+This is the repo for the manuscript: [QComp: A QSAR-Based Imputation Framework for Drug Discovery](https://pubs.acs.org/doi/full/10.1021/acs.jcim.5c00059)
+
 
 ## Install dependencies
 On Linux:
